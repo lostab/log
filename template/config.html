@@ -1,0 +1,28 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{% if site %}{{ site.title|escape }} - {% endif %}设置{% endblock %}
+{% block site-title %}{% if site %}{{ site.title|escape }}{% else %}设置{% endif %}{% endblock %}
+{% block site-description %}{% if site %}{{ site.description|escape }}{% endif %}{% endblock %}
+{% block container %}
+	<div id="config-form">
+		<h5>网站设置</h5>
+		<form action="/config" method="post">
+			<label for="site-title">标题：</label><input type="text" name="title" id="site-title" value="{% if site %}{{ site.title|escape }}{% endif %}">
+			<br />
+			<label for="site-author">作者：</label><input type="text" name="author" id="site-author" value="{% if site %}{{ site.author|escape }}{% endif %}">
+			<br />
+			<label for="site-email">邮箱：</label><input type="email" name="email" id="site-email" value="{% if site %}{{ site.email|escape }}{% endif %}">
+			<br />
+			<label for="site-url">网址：</label><input type="url" name="url" id="site-url" value="{% if site %}{{ site.url|escape }}{% endif %}">
+			<br />
+			<label for="site-description">描述：</label><input type="text" name="description" id="site-description" value="{% if site %}{{ site.description|escape }}{% endif %}">
+			<br />
+			<input type="submit" id="config-submit" value="提交">
+		</form>
+	{% if site %}
+		<div class="operate">
+			<a class="cancel-link" href="/">取消</a>
+		</div>
+	{% endif %}
+	</div>
+{% endblock %}

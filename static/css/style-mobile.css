@@ -1,0 +1,25 @@
+#header{
+	width:100%;
+}
+#search-form{
+	display:block;
+}
+#container{
+	width:100%;
+}
+#publish-form,#edit-post{
+	width:100%;
+}
+#publish-form > form > #post-title,#edit-post > form > #post-title{
+	width:80%;
+}
+#publish-form > form > #post-content,#edit-post > form > #post-content{
+	width:80%;
+	height:60px;
+}
+#comment-form > form > #comment-content,#edit-comment > form > #comment-content{
+	width:80%;
+}
+#footer{
+	width:100%;
+}

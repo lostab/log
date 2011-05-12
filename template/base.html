@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+{% if mobile %}
+	<meta name="viewport" content="maximum-scale=1.0,width=device-width,initial-scale=1.0" />
+{% endif %}
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+{% if mobile %}
+	<link rel="stylesheet" href="/static/css/style-mobile.css" type="text/css" />
+{% endif %}
+	<link rel="alternate" href="/rss" type="application/rss+xml" />
+	<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/js/lostab.js"></script>
+	<script type="text/javascript">
+		var page = "{% block page %}{% endblock %}";
+		var q = "{% if q %}{{ q }}{% endif %}";
+	</script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="header">
+			<h2 id="title"><a href="/">{% block site-title %}{% endblock %}</a></h2>
+			<div id="description">{% block site-description %}{% endblock %}</div>
+			<div id="menu">
+			{% if user %}
+				{{ user.email }}
+				{% if admin and site %}
+					{% if not new %}
+						<a href="/add/post">撰写</a>
+					{% endif %}
+					{% if not config %}
+						<a href="/config">设置</a>
+					{% endif %}
+				{% endif %}
+				<a class="logout-link" href="{{ logout|escape }}">退出</a>
+			{% endif %}
+			{% if not guestbook %}
+				<a class="guestbook-link" href="/guestbook">留言</a>
+			{% endif %}
+				<a class="feed-link" href="/feed">订阅</a>
+				<form id="search-form" action="/">
+					<input type="text" name="q" id="search">
+					<input type="submit" value="搜索" id="search-submit">
+				</form>
+			</div>
+		</div>
+		<div id="container">
+		{% block container %}{% endblock %}
+		</div>
+		<div id="footer">
+			{% if site %}{{ site.author|escape }} @ 2011{% endif %}
+			powered by <span title="Google App Engine">GAE</span>
+			{% if not user %}<a href="{{ login|escape }}">登录</a>{% endif %}
+		</div>
+	</div>
+</body>
+</html>

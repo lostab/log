@@ -1,0 +1,64 @@
+﻿{% extends "base.html" %}
+
+{% block page %}{% if page %}{{ page|escape }}{% endif %}{% endblock %}
+
+{% block title %}{{ site.title|escape }}{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+		{% if admin %}
+			<div id="simple-publish">
+				<h5>快速发布</h5>
+				<form action="/add/post" method="post">
+					<textarea name="content" id="post-content"></textarea>
+					<div class="editor-tips">支持HTML，嵌入代码使用&ltcode<b><i>*</i></b>&gt...&lt/code<b><i>*</i></b>&gt标签。</div>
+					<input type="submit" id="post-submit" value="发布">
+				</form>
+			</div>
+		{% endif %}
+			<div id="content">
+			{% if posts %}
+				<ol id="posts">
+				{% for post in posts %}
+					<li class="post" id="post-{{ post.key }}">
+					{% if post.title %}
+						<h4 class="post-title">
+							{{ post.title|escape }}
+						</h4>
+					{% endif %}
+						<div class="post-content">
+							{{ post.content }}
+						</div>
+						<div class="time">{{ post.time|date:"Y-m-d H:i:s" }}</div>
+						<div class="operate">
+							{% if post.comment %}<span class="commentcount">{{ post.comment|escape }}</span>条{% endif %}<a class="comment-link" href="/post/{{ post.key|escape }}#comment-form">评论</a>
+							<a class="post-link" href="/post/{{ post.key }}">链接</a>
+						{% if admin %}
+							<a class="update-link" href="/update/post?key={{ post.key }}">修改</a>
+							<a class="delete-link" href="/delete/post?key={{ post.key }}">删除</a>
+						{% endif %}
+						</div>
+					</li>
+				{% endfor %}
+				</ol>
+			{% else %}
+				<p>暂时没有文章。</p>
+			{% endif %}
+				<div id="page-link">
+				{% if previous %}
+					{% if q %}
+					<a id="previous-link" href="/previous/{{ previous }}?q={{ q|escape }}">上一页</a>
+					{% else %}
+					<a id="previous-link" href="/previous/{{ previous }}">上一页</a>
+					{% endif %}
+				{% endif %}
+				{% if next %}
+					{% if q %}
+					<a id="next-link" href="/next/{{ next }}?q={{ q|escape }}">下一页</a>
+					{% else %}
+					<a id="next-link" href="/next/{{ next }}">下一页</a>
+					{% endif %}
+				{% endif %}
+				</div>
+			</div>
+{% endblock %}
