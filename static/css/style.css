@@ -28,6 +28,9 @@ a:hover{
 	background:green;
 	color:white;
 	border-radius:3px;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	-khtml-border-radius:3px;
 }
 label{
 	font-size:13px;
@@ -107,11 +110,20 @@ label{
 	list-style-type:none;
 	list-style-position:outside;
 }
+#content .return-info{
+	font-size:13px;
+	text-indent:2em;
+	word-wrap:break-word;
+	color:lightgray;
+}
+#content .search-word{
+	color:gray;
+}
 .post-title{
 	text-indent:2em;
 	word-wrap:break-word;
 }
-.post-content,#content p{
+.post-content{
 	font-size:13px;
 	text-indent:2em;
 	word-wrap:break-word;
@@ -156,7 +168,7 @@ label{
 .comment-content{
 	word-wrap:break-word;
 }
-.comment-content pre{
+.post-content pre,.comment-content pre{
 	margin:0;
 	padding:0;
 	white-space:pre-wrap;

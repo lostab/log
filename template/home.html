@@ -11,13 +11,16 @@
 				<h5>快速发布</h5>
 				<form action="/add/post" method="post">
 					<textarea name="content" id="post-content"></textarea>
-					<div class="editor-tips">支持HTML，嵌入代码使用&ltcode<b><i>*</i></b>&gt...&lt/code<b><i>*</i></b>&gt标签。</div>
+					<div class="editor-tips">支持HTML，嵌入代码使用&lt;code<b><i>*</i></b>&gt;...&lt;/code<b><i>*</i></b>&gt;标签。</div>
 					<input type="submit" id="post-submit" value="发布">
 				</form>
 			</div>
 		{% endif %}
 			<div id="content">
 			{% if posts %}
+				{% if q %}
+					<p class="return-info"> <span class="search-word">{{ q }}</span> 的搜索结果：</p>
+				{% endif %}
 				<ol id="posts">
 				{% for post in posts %}
 					<li class="post" id="post-{{ post.key }}">
@@ -42,7 +45,11 @@
 				{% endfor %}
 				</ol>
 			{% else %}
-				<p>暂时没有文章。</p>
+				{% if q %}
+					<p class="return-info">暂时找不到 <span class="search-word">{{ q }}</span> 的搜索结果。</p>
+				{% else %}
+					<p class="return-info">暂时没有文章。</p>
+				{% endif %}
 			{% endif %}
 				<div id="page-link">
 				{% if previous %}

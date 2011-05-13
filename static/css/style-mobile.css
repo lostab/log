@@ -17,6 +17,10 @@
 	width:80%;
 	height:60px;
 }
+.post-content img{
+	max-width:80%;
+	height:auto;
+}
 #comment-form > form > #comment-content,#edit-comment > form > #comment-content{
 	width:80%;
 }

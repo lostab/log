@@ -79,7 +79,7 @@ var lostab = {
 				}
 				$(this).find("#search-submit").val("搜索中…");
 				$(this).find("#search-submit").attr("disabled",true);
-				$("#wrapper").load(encodeURI("/?q="+$.trim($("#search").val()))+" #wrapper",function(){
+				$("#wrapper").load("/?q="+encodeURIComponent($.trim($("#search").val()))+" #wrapper",function(){
 					$(this).html($(this).children("#wrapper").html());
 					that.ajax($(this));
 				});
@@ -119,6 +119,7 @@ var lostab = {
 				return false;
 			});*/
 			obj.find("#header").find("a").not(".feed-link,.logout-link").click(function(){
+				$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:10px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
 				$(this).load($(this).attr("href")+" #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
 					that.ajax($("#wrapper"));
@@ -126,6 +127,7 @@ var lostab = {
 				return false;
 			});
 			obj.find("#publish-form,#config-form,#edit-post,#edit-comment").find(".cancel-link").click(function(){
+				$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:10px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
 				$(this).load("/ #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
 					that.ajax($("#wrapper"));
@@ -133,6 +135,7 @@ var lostab = {
 				return false;
 			});
 			obj.find(".return-link").click(function(){
+				$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:10px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
 				$(this).load("/ #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
 					that.ajax($("#wrapper"));
