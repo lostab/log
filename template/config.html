@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}{% if site %}{{ site.title|escape }} - {% endif %}设置{% endblock %}
+{% block title %}设置{% if site %} - {{ site.title|escape }}{% endif %}{% endblock %}
 {% block site-title %}{% if site %}{{ site.title|escape }}{% else %}设置{% endif %}{% endblock %}
 {% block site-description %}{% if site %}{{ site.description|escape }}{% endif %}{% endblock %}
 {% block container %}

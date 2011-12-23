@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block page %}{% if page %}{{ page|escape }}{% endif %}{% endblock %}
 
@@ -24,22 +24,25 @@
 				<ol id="posts">
 				{% for post in posts %}
 					<li class="post" id="post-{{ post.key }}">
-					{% if post.title %}
 						<h4 class="post-title">
+							<a class="post-permalink" href="/post/{{ post.key }}">
+						{% if post.title %}
 							{{ post.title|escape }}
+						{% else %}
+							{{ post.time|date:"Y-m-d H:i:s" }}
+						{% endif %}
+							</a>
 						</h4>
-					{% endif %}
 						<div class="post-content">
 							{{ post.content }}
 						</div>
-						<div class="time">{{ post.time|date:"Y-m-d H:i:s" }}</div>
 						<div class="operate">
 							{% if post.comment %}<span class="commentcount">{{ post.comment|escape }}</span>条{% endif %}<a class="comment-link" href="/post/{{ post.key|escape }}#comment-form">评论</a>
-							<a class="post-link" href="/post/{{ post.key }}">链接</a>
 						{% if admin %}
 							<a class="update-link" href="/update/post?key={{ post.key }}">修改</a>
 							<a class="delete-link" href="/delete/post?key={{ post.key }}">删除</a>
 						{% endif %}
+							<a class="time post-permalink">{{ post.time|date:"Y-m-d H:i:s" }}</a>
 						</div>
 					</li>
 				{% endfor %}
@@ -68,4 +71,5 @@
 				{% endif %}
 				</div>
 			</div>
+			{% include "rightsidebar.html" %}
 {% endblock %}

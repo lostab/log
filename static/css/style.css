@@ -1,13 +1,24 @@
 html,body{
 	margin:0;
 	padding:0;
+	background:lightgray;
 }
 #wrapper{
 	width:100%;
 	text-align:center;
+	font-family:"Constantia";
 }
 a{
 	text-decoration:none;
+	color:green;
+}
+a:hover{
+	background:green;
+	color:white;
+	border-radius:3px;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	-khtml-border-radius:3px;
 }
 input,textarea{
 	border-radius:3px;
@@ -19,25 +30,22 @@ input,textarea{
 #menu,.operate{
 	clear:right;
 	text-align:right;
-	font-size:13px;
+	font-size:16px;
+	color:gray;
 }
-a{
-	color:green;
+label{
+	font-size:16px;
 }
-a:hover{
-	background:green;
-	color:white;
+img{
 	border-radius:3px;
 	-webkit-border-radius:3px;
 	-moz-border-radius:3px;
 	-khtml-border-radius:3px;
 }
-label{
-	font-size:13px;
-}
 #header{
-	width:800px;
+	width:960px;
 	margin:0 auto;
+	margin-top:13px;
 	margin-bottom:7px;
 	border-bottom:2px solid lightgray;
 	text-align:left;
@@ -52,12 +60,18 @@ label{
 	color:green;
 }
 .time{
-	float:right;
-	font-size:13px;
+	font-size:16px;
+	color:gray;
+}
+a.time{
+	color:gray;
+}
+a.time:hover{
+	background:none;
 	color:gray;
 }
 #description{
-	font-size:13px;
+	font-size:16px;
 	text-indent:2em;
 }
 #search-form{
@@ -73,14 +87,18 @@ label{
 	border-color:lightgray;
 	background:white;
 }
+.music-switch{
+	cursor:pointer;
+}
 #container{
-	width:800px;
+	width:960px;
 	margin:0 auto;
 	text-align:left;
 }
 #simple-publish{
 	width:80%;
 	margin:0 auto;
+	padding-bottom:30px;
 }
 #publish-form,#edit-post{
 	width:800px;
@@ -103,7 +121,11 @@ label{
 #simple-publish #post-submit{
 	float:right;
 }
-#posts,#comments,.comment > .children{
+#content{
+	width:720px;
+	float:left;
+}
+#posts,#comments,.comment .children{
 	clear:both;
 	margin:0;
 	padding:0;
@@ -111,25 +133,26 @@ label{
 	list-style-position:outside;
 }
 #content .return-info{
-	font-size:13px;
+	font-size:16px;
 	text-indent:2em;
 	word-wrap:break-word;
-	color:lightgray;
+	color:gray;
 }
 #content .search-word{
-	color:gray;
+	font-weight:bold;
 }
 .post-title{
 	text-indent:2em;
 	word-wrap:break-word;
 }
 .post-content{
-	font-size:13px;
+	font-size:16px;
 	text-indent:2em;
 	word-wrap:break-word;
 }
 .post-content p{
-	margin:1em;
+	margin-top:1em;
+	margin-bottom:1em;
 	text-indent:2em;
 }
 .post-content code{
@@ -156,7 +179,7 @@ label{
 	float:left;
 }
 .comment-author{
-	font-size:13px;
+	font-size:16px;
 	margin:0;
 	padding:0;
 	font-weight:bold;
@@ -166,6 +189,7 @@ label{
 	word-wrap:break-word;
 }
 .comment-content{
+	font-size:16px;
 	word-wrap:break-word;
 }
 .post-content pre,.comment-content pre{
@@ -180,19 +204,36 @@ label{
 #page-link,#previous-next-post{
 	clear:both;
 	text-align:center;
-	font-size:13px;
+	font-size:16px;
+	color:gray;
 }
 #comment-form #comment-content,#edit-comment #comment-content{
 	vertical-align:top;
 	overflow-y:visible;
+	width:300px;
+	height:100px;
+}
+#rightsidebar{
+	float:right;
+	width:230px;
+}
+#rightsidebar ol,#rightsidebar li{
+	margin:0;
+	padding:0;
+	list-style-type:none;
+	list-style-position:outside;
+}
+#rightsidebar li{
+	margin-bottom:3px;
 }
 #footer{
 	clear:both;
-	width:800px;
+	width:960px;
 	margin:0 auto;
 	margin-top:7px;
+	margin-bottom:13px;
 	text-align:right;
-	font-size:13px;
+	font-size:16px;
 	color:gray;
 	border-top:2px solid lightgray;
 }
@@ -204,15 +245,24 @@ label{
 	color:white;
 	border-radius:3px;
 }
-abbr{
-	cursor:help;
-}
 .editor-tips{
 	color:gray;
 	font-size:10px;
 }
-.post-link{
-	display:none;
+#header,.post,#post,.widget{
+	background:white;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+}
+#header{
+	margin-top:0;
+	padding-top:13px;
+}
+.post,#post,.widget{
+	padding:7px;
+	margin-bottom: 10px;
 }
 ::selection{background:green;color:white;}
 ::-webkit-selection{background:green;color:white;}

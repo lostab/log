@@ -17,12 +17,20 @@
 	width:80%;
 	height:60px;
 }
-.post-content img{
+#content{
+	width:100%;
+	clear:both;
+}
+.post-content img,.post-content audio,.post-content video,.post-content iframe{
 	max-width:80%;
 	height:auto;
 }
 #comment-form > form > #comment-content,#edit-comment > form > #comment-content{
 	width:80%;
+}
+#rightsidebar{
+	width:100%;
+	clear:both;
 }
 #footer{
 	width:100%;

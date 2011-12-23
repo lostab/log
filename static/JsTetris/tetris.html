@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+	<title>JsTetris	- JavaScript版俄罗斯方块</title>
+	<meta http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+	<link href="tetris.css"	rel="stylesheet" type="text/css">
+	<link href="tetris.ico" rel="shortcut icon">
+	<script	type="text/javascript" src="tetris.js"></script>
+	<style type="text/css">
+	html, body { height: 100%; }
+	#tetris	{ margin: 0	auto; }
+	</style>
+</head>
+<body>
+
+<table style="width: 100%; height: 100%;" cellspacing="0" cellpadding="0"><tr><td style="vertical-align: middle;">
+
+	<div id="tetris">
+		<div class="left">
+			<h1><a href="tetris.html">JsTetris - JavaScript版俄罗斯方块</a></h1>
+			<div class="menu">
+				<div><a href="javascript:void(0)" id="tetris-menu-start">新游戏</a></div>
+				<div id="tetris-pause">
+					<a href="javascript:void(0)" id="tetris-menu-pause">暂停</a>
+				</div>
+				<div style="display: none;" id="tetris-resume">
+					<a href="javascript:void(0)" id="tetris-menu-resume">继续</a>
+				</div>
+				<div><a href="javascript:void(0)" id="tetris-menu-highscores">最高分</a></div>
+				<div><a href="javascript:void(0)" id="tetris-menu-help">关于</a></div>
+			</div>
+			<div id="tetris-nextpuzzle"></div>
+			<div id="tetris-gameover">游戏结束</div>
+			<div id="tetris-keys">
+				<div class="h5">快捷键：</div>
+				<table cellspacing="0" cellpadding="0">
+				<tr>
+					<td>旋转：</td>
+					<td></td>
+					<td><img src="key-up.gif" width="14" height="14" alt=""></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>移动：</td>
+					<td><img src="key-left.gif" width="14" height="14" alt=""></td>
+					<td><img src="key-down.gif" width="14" height="14" alt=""></td>
+					<td><img src="key-right.gif" width="14" height="14" alt=""></td>
+				</tr>
+				<tr>
+					<td>下落：</td>
+					<td colspan="3">
+						<img src="key-space.gif" width="44" height="13" alt="">
+					</td>
+				</tr>
+				</table>
+			</div>
+			<div class="stats">
+				<div class="h5">统计：</div>
+				<table cellspacing="0" cellpadding="0">
+				<tr>
+					<td	class="level">等级：</td>
+					<td><span id="tetris-stats-level">1</span></td>
+				</tr>
+				<tr>
+					<td	class="score">分数：</td>
+					<td><span id="tetris-stats-score">0</span></td>
+				</tr>
+				<tr>
+					<td	class="lines">行数：</td>
+					<td><span id="tetris-stats-lines">0</span></td>
+				</tr>
+				<tr>
+					<td	class="apm">APM:</td>
+					<td><span id="tetris-stats-apm">0</span></td>
+				</tr>
+				<tr>
+					<td	class="time">时间：</td>
+					<td><span id="tetris-stats-time">0</span></td>
+				</tr>
+
+				</table>
+			</div>
+		</div>
+		<div class="left-border"></div>
+		<div id="tetris-area">
+			<div class="grid1"></div>
+			<div class="grid2"></div>
+			<div class="grid3"></div>
+			<div class="grid4"></div>
+			<div class="grid5"></div>
+			<div class="grid6"></div>
+		</div>
+		<div id="tetris-help" class="window">
+			<div class="top">
+				关于 <span id="tetris-help-close" class="close">x</span>
+			</div>
+			<div class="content" style="margin-top:	1em;">
+				<div style="margin-top:	1em;">
+				<div>JsTetris 是一个使用 JavaScript 编写的可高度定制的俄罗斯方块游戏，提供完整的源代码，可以随意修改。
+				</div>
+				<br>
+				<div>作者：Cezary Tomczak</div>
+				<div>网站：<a href="http://www.gosu.pl/tetris/">www.gosu.pl/tetris/</a></div>
+				<br>
+				<div>汉化：<a href="/">lostab</a></div>
+				<br>
+				<div>许可：BSD修订（免费用于任何用途）</div>
+				</div>
+			</div>
+		</div>
+		<div id="tetris-highscores"	class="window">
+			<div class="top">
+				最高分 <span id="tetris-highscores-close" class="close">x</span>
+			</div>
+			<div class="content">
+				<div id="tetris-highscores-content"></div>
+				<br>
+				注意：这些分数纪录保存在 cookie 中，只在当前设备上有效。
+			</div>
+		</div>
+	</div>
+
+</td></tr></table>
+
+	<script	type="text/javascript">
+	var tetris = new Tetris();
+	tetris.unit = 14;
+	tetris.areaX = 12;
+	tetris.areaY = 22;
+	</script>
+
+</body>
+</html>

@@ -14,5 +14,11 @@ handlers:
   static_files: static/img/favicon.ico
   upload: static/img/favicon.ico
 
+- url: /winterbells
+  static_dir: static/winterbells
+
+- url: /jstetris
+  static_dir: static/JsTetris
+
 - url: /.*
   script: lostab.py

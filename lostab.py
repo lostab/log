@@ -1,4 +1,6 @@
-﻿import cgi
+# -*- coding: utf-8 -*-
+
+import cgi
 import datetime
 import wsgiref.handlers
 import os
@@ -15,7 +17,7 @@ import random
 from datetime import timedelta
 from google.appengine.api import mail
 
-PAGESIZE = 7
+PAGESIZE = 10
 FETCHSIZE = 999
 
 class Site(db.Model):
@@ -114,7 +116,7 @@ def outputcomment(post, comments, temp, parentkey, reply):
 				temp.append(child)
 				childkey = child.key().__str__()
 				commenthtml += '<li class="comment" id="comment-' + childkey + '">'
-				commenthtml += '<div class="comment-avator"><img src="http://www.gravatar.com/avatar/'+ cgi.escape(child.email.encode('utf-8')) +'?s=32"></div>'
+				commenthtml += '<div class="comment-avator"><img src="http://www.gravatar.com/avatar/'+ cgi.escape(child.email.encode('utf-8')) +'?s=48"></div>'
 				commenthtml += '<div class="comment-author">'
 				if child.url:
 					commenthtml += '<a href="'+ cgi.escape(child.url.encode('utf-8')) +'">'
@@ -128,7 +130,6 @@ def outputcomment(post, comments, temp, parentkey, reply):
 				commenthtml += '<div class="comment-content">'
 				commenthtml += '<pre>' + cgi.escape(child.content.encode('utf-8')) + '</pre>'
 				commenthtml += '</div>'
-				commenthtml += '<div class="time">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</div>'
 				commenthtml += '<div class="operate">'
 				if not reply or (reply and reply['key'] != childkey):
 					if post:
@@ -138,6 +139,10 @@ def outputcomment(post, comments, temp, parentkey, reply):
 				if users.is_current_user_admin():
 					commenthtml += ' <a class="update-link" href="/update/comment?key=' + childkey + '">修改</a>'
 					commenthtml += ' <a class="delete-link" href="/delete/comment?key=' + childkey + '">删除</a>'
+				if post:
+					commenthtml += ' <a class="comment-permalink time" href="/post/' + post + '#comment-' + childkey + '">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
+				else:
+					commenthtml += ' <a class="comment-permalink time" href="/guestbook#comment-' + childkey + '">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
 				commenthtml += '</div>'
 				if reply and reply['key'] == childkey:
 					commenthtml += '<div id="comment-form">'
@@ -186,22 +191,43 @@ def ismobile(self):
 	else:
 		return None
 
+def getrecentcomments(number):
+	try:
+		recentcomments = memcache.get("recentcomments")
+		if recentcomments is None:
+			recentcomments = Comment.all().order('-time').fetch(number)
+			memcache.add("recentcomments", recentcomments)
+		return recentcomments
+	except:
+		return None
+
 class MainPage(webapp.RequestHandler):
 	def get(self, str):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
-			url = ['']
-			if str not in url:
-				self.redirect('/')
+			if str != '':
+				if str == 'login':
+					self.redirect(users.create_login_url('/'))
+				else:
+					self.redirect('/')
 			else:
 				q = self.request.get('q').strip()
 				if q:
-					posts = getposts(PAGESIZE, None, q, 'next')
+					posts = memcache.get("qposts-" + q)
+					if posts is None:
+						posts = getposts(PAGESIZE, None, q, 'next')
+						memcache.add("qposts-" + q, posts)
 				else:
-					query = Post.gql('ORDER BY time DESC, __key__ ASC')
-					posts = query.fetch(PAGESIZE + 1)
+					posts = memcache.get("posts")
+					if posts is None:
+						query = Post.gql('ORDER BY time DESC, __key__ ASC')
+						posts = query.fetch(PAGESIZE + 1)
+						memcache.add("posts", posts)
 
 				if len(posts) == PAGESIZE + 1:
 					posts = posts[:PAGESIZE]
@@ -211,13 +237,17 @@ class MainPage(webapp.RequestHandler):
 
 				for post in posts:
 					post.content = re.sub(ur'<code(?P<index>.*)>(?P<content>[\s\S]*)</code(?P=index)>', lambda m: '<code>' + cgi.escape(m.group('content')) + '</code>', post.content)
-					post.comment = len(getcomments(post.key().__str__(), None))
+					post.comment = memcache.get("postcommentcount-" + post.key().__str__())
+					if post.comment is None:
+						post.comment = len(getcomments(post.key().__str__(), None))
+						memcache.add("postcommentcount-" + post.key().__str__(), post.comment)
 					post.time += timedelta(hours=+8)
 
 				template_values = {
 					'site': site,
 					'posts': posts,
 					'previous': None,
+					'recentcomments': getrecentcomments(PAGESIZE),
 					'next': next,
 					'page': 'home'
 				}
@@ -242,7 +272,10 @@ class MainPage(webapp.RequestHandler):
 
 class ConfigPage(webapp.RequestHandler):
 	def get(self):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if users.is_current_user_admin():
 			user = users.get_current_user()
 			template_values = {
@@ -263,13 +296,16 @@ class ConfigPage(webapp.RequestHandler):
 			self.redirect(users.create_login_url(self.request.uri))
 	def post(self):
 		if users.is_current_user_admin():
-			site = Site.all().get()
+			site = memcache.get("site")
+			if site is None:
+				site = Site.all().get()
+				memcache.add("site", site)
 			if not site:
 				site = Site()
 			title = self.request.get('title').strip()
 			author = self.request.get('author').strip()
 			email = self.request.get('email').strip()
-			url = self.request.get('url').strip()
+			url = self.request.get('url').strip().rstrip("/")
 			description = self.request.get('description').strip()
 			if title and author and email and re.compile(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)", re.IGNORECASE).match(email) and url and re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+').match(url):
 				site.title = title
@@ -286,7 +322,10 @@ class ConfigPage(webapp.RequestHandler):
 
 class PreviousPage(webapp.RequestHandler):
 	def get(self, key):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -294,16 +333,22 @@ class PreviousPage(webapp.RequestHandler):
 				try:
 					q = self.request.get('q').strip()
 					if q:
-						posts = getposts(PAGESIZE, db.Key(key), q, 'previous')
+						posts = memcache.get("previousqposts-" + key + q)
+						if posts is None:
+							posts = getposts(PAGESIZE, db.Key(key), q, 'previous')
+							memcache.add("previousqposts-" + key + q, posts)
 					else:
-						post = Post.all().order("-__key__").filter('__key__ =', db.Key(key)).get()
-						query = Post.gql('WHERE time = :time AND __key__ < :key ORDER BY __key__ DESC, time ASC', time = post.time, key = post.key())
-						posts = query.fetch(PAGESIZE + 1)
-						if len(posts) < PAGESIZE + 1:
-							remainder = PAGESIZE + 1 - len(posts)
-							query = Post.gql('WHERE time > :time ORDER BY time ASC, __key__ DESC', time = post.time)
-							moreposts = query.fetch(remainder)
-							posts += moreposts
+						posts = memcache.get("previousposts-" + key)
+						if posts is None:
+							post = Post.all().order("-__key__").filter('__key__ =', db.Key(key)).get()
+							query = Post.gql('WHERE time = :time AND __key__ < :key ORDER BY __key__ DESC, time ASC', time = post.time, key = post.key())
+							posts = query.fetch(PAGESIZE + 1)
+							if len(posts) < PAGESIZE + 1:
+								remainder = PAGESIZE + 1 - len(posts)
+								query = Post.gql('WHERE time > :time ORDER BY time ASC, __key__ DESC', time = post.time)
+								moreposts = query.fetch(remainder)
+								posts += moreposts
+							memcache.add("previousposts-" + key, posts)
 
 					if posts:
 						next = posts[0].key()
@@ -353,7 +398,10 @@ class PreviousPage(webapp.RequestHandler):
 
 class NextPage(webapp.RequestHandler):
 	def get(self, key):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -361,16 +409,22 @@ class NextPage(webapp.RequestHandler):
 				try:
 					q = self.request.get('q').strip()
 					if q:
-						posts = getposts(PAGESIZE, db.Key(key), q, 'next')
+						posts = memcache.get("nextqposts-" + key + q)
+						if posts is None:
+							posts = getposts(PAGESIZE, db.Key(key), q, 'next')
+							memcache.add("nextqposts-" + key + q, posts)
 					else:
-						post = Post.all().order("-__key__").filter('__key__ =', db.Key(key)).get()
-						query = Post.gql('WHERE time = :time AND __key__ > :key ORDER BY __key__ ASC, time DESC', time = post.time, key = post.key())
-						posts = query.fetch(PAGESIZE + 1)
-						if len(posts) < PAGESIZE + 1:
-							remainder = PAGESIZE + 1 - len(posts)
-							query = Post.gql('WHERE time < :time ORDER BY time DESC, __key__ ASC', time = post.time)
-							moreposts = query.fetch(remainder)
-							posts += moreposts
+						posts = memcache.get("nextposts-" + key)
+						if posts is None:
+							post = Post.all().order("-__key__").filter('__key__ =', db.Key(key)).get()
+							query = Post.gql('WHERE time = :time AND __key__ > :key ORDER BY __key__ ASC, time DESC', time = post.time, key = post.key())
+							posts = query.fetch(PAGESIZE + 1)
+							if len(posts) < PAGESIZE + 1:
+								remainder = PAGESIZE + 1 - len(posts)
+								query = Post.gql('WHERE time < :time ORDER BY time DESC, __key__ ASC', time = post.time)
+								moreposts = query.fetch(remainder)
+								posts += moreposts
+							memcache.add("nextposts-" + key, posts)
 
 					if posts:
 						previous = posts[0].key()
@@ -419,13 +473,18 @@ class NextPage(webapp.RequestHandler):
 
 class Feed(webapp.RequestHandler):
 	def get(self):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
 			site.url = site.url.rstrip("/")
-			query = Post.gql('ORDER BY time DESC, __key__ ASC')
-			posts = query.fetch(PAGESIZE)
+			posts = memcache.get("posts")
+			if posts is None:
+				query = Post.gql('ORDER BY time DESC, __key__ ASC')
+				posts = query.fetch(PAGESIZE)
 			
 			for item in posts:
 				item.content = re.sub(ur'<code(?P<index>.*)>(?P<content>[\s\S]*)</code(?P=index)>', lambda m: '<code>' + cgi.escape(m.group('content')) + '</code>', item.content)
@@ -442,7 +501,10 @@ class Feed(webapp.RequestHandler):
 
 class AddPost(webapp.RequestHandler):
 	def get(self):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -472,6 +534,12 @@ class AddPost(webapp.RequestHandler):
 				post.title = title
 				post.content = content
 				post.put()
+
+				posts = memcache.get("posts")
+				if posts is not None:
+					posts.insert(0, post)
+					memcache.replace("posts", posts)
+
 				key = post.key().__str__()
 				self.redirect('/post/' + key)
 		self.redirect('/')
@@ -495,7 +563,10 @@ class DeletePost(webapp.RequestHandler):
 class UpdatePost(webapp.RequestHandler):
 	def get(self):
 		key = self.request.get('key')
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -545,18 +616,25 @@ class UpdatePost(webapp.RequestHandler):
 
 class ViewPost(webapp.RequestHandler):
 	def get(self, key):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
 			if key:
 				try:
-					post = Post.all().order("-__key__").filter('__key__ = ', db.Key(key)).get()
+					post = memcache.get("post-" + key)
+					if post is None:
+						post = Post.all().order("-__key__").filter('__key__ = ', db.Key(key)).get()
+						memcache.add("post-" + key, post)
 					outputcaptcha = captcha()
 					if post and outputcaptcha:
 						template_values = {
 							'site': site,
-							'captcha': outputcaptcha
+							'captcha': outputcaptcha,
+							'recentcomments': getrecentcomments(PAGESIZE)
 						}
 
 						user = users.get_current_user()
@@ -568,18 +646,28 @@ class ViewPost(webapp.RequestHandler):
 						else:
 							template_values['login'] = users.create_login_url(self.request.uri)
 
-						previouspost = Post.gql('WHERE time = :time AND __key__ < :key ORDER BY __key__ DESC, time ASC', time = post.time, key = post.key()).get()
-						if not previouspost:
-							previouspost = Post.gql('WHERE time > :time ORDER BY time ASC, __key__ DESC', time = post.time).get()
+						previouspost = memcache.get("previouspost-" + key)
+						if previouspost is None:
+							previouspost = Post.gql('WHERE time = :time AND __key__ < :key ORDER BY __key__ DESC, time ASC', time = post.time, key = post.key()).get()
+							if not previouspost:
+								previouspost = Post.gql('WHERE time > :time ORDER BY time ASC, __key__ DESC', time = post.time).get()
+							memcache.add("previouspost-" + key, previouspost)
 						if previouspost:
 							template_values['previouspost'] = previouspost
-						nextpost = Post.gql('WHERE time = :time AND __key__ > :key ORDER BY __key__ ASC, time DESC', time = post.time, key = post.key()).get()
-						if not nextpost:
-							nextpost = Post.gql('WHERE time < :time ORDER BY time DESC, __key__ ASC', time = post.time).get()
+
+						nextpost = memcache.get("nextpost-" + key)
+						if nextpost is None:
+							nextpost = Post.gql('WHERE time = :time AND __key__ > :key ORDER BY __key__ ASC, time DESC', time = post.time, key = post.key()).get()
+							if not nextpost:
+								nextpost = Post.gql('WHERE time < :time ORDER BY time DESC, __key__ ASC', time = post.time).get()
+							memcache.add("nextpost-" + key, nextpost)
 						if nextpost:
 							template_values['nextpost'] = nextpost
 
-						comments = getcomments(key, None)
+						comments = memcache.get("comments-" + key)
+						if comments is None:
+							comments = getcomments(key, None)
+							memcache.add("comments-" + key, comments)
 
 						for comment in comments:
 							comment.email = hashlib.new('md5', comment.email).hexdigest()
@@ -589,7 +677,10 @@ class ViewPost(webapp.RequestHandler):
 						reply = None
 						replykey = self.request.get('reply')
 						if replykey:
-							comment = Comment.all().order("-__key__").filter('__key__ =', db.Key(replykey)).get()
+							comment = memcache.get("comment-" + replykey)
+							if comments is None:
+								comment = Comment.all().order("-__key__").filter('__key__ =', db.Key(replykey)).get()
+								memcache.add("comment-" + replykey, comment)
 							if comment and comment.post == key:
 								reply = {
 										'key': str(replykey),
@@ -641,7 +732,10 @@ class AddComment(webapp.RequestHandler):
 
 			if post:
 				try:
-					commentpost = Post.all().order("-__key__").filter('__key__ =', db.Key(post)).get()
+					commentpost = memcache.get("post-" + post)
+					if commentpost is None:
+						commentpost = Post.all().order("-__key__").filter('__key__ =', db.Key(post)).get()
+						memcache.add("post-" + post, commentpost)
 					if commentpost:
 						comment.post = post
 					else:
@@ -655,7 +749,10 @@ class AddComment(webapp.RequestHandler):
 
 			if parentkey:
 				try:
-					parentcomment = Comment.all().order("-__key__").filter('__key__ =', db.Key(parentkey)).get()
+					parentcomment = memcache.get("comment-" + parentkey)
+					if parentcomment is None:
+						parentcomment = Comment.all().order("-__key__").filter('__key__ =', db.Key(parentkey)).get()
+						memcache.add("comment-" + parentkey, parentcomment)
 					if parentcomment:
 						comment.parentkey = parentkey
 						replynoticemail = parentcomment.email
@@ -666,10 +763,33 @@ class AddComment(webapp.RequestHandler):
 			else:
 				comment.parentkey = None
 			comment.put()
+			
+			recentcomments = memcache.get("recentcomments")
+			if recentcomments is not None:
+				recentcomments.insert(0, comment)
+				recentcomments.pop()
+				memcache.replace("recentcomments", recentcomments)
+
+			
+			postcommentskey = post
+			if not post:
+				postcommentskey = "none"
+			postcomments = memcache.get("comments-" + postcommentskey)
+			if postcomments is not None:
+				postcomments.insert(0, comment)
+				memcache.replace("comments-" + postcommentskey, postcomments)
+
+			postcommentcount = memcache.get("postcommentcount-" + postcommentskey)
+			if postcommentcount is not None:
+				postcommentcount = postcommentcount + 1
+				memcache.replace("postcommentcount-" + postcommentskey, postcommentcount)
 
 			commentkey = comment.key().__str__()
 
-			site = Site.all().get()
+			site = memcache.get("site")
+			if site is None:
+				site = Site.all().get()
+				memcache.add("site", site)
 			if site and replynoticemail and re.compile(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)", re.IGNORECASE).match(replynoticemail):
 				replynotice = mail.EmailMessage()
 				replynotice.sender = site.email
@@ -687,9 +807,9 @@ class AddComment(webapp.RequestHandler):
 				链接：
 				%s
 				''' % (site.title, site.url, comment.author, comment.content, commenturl)
-				replynotice.html = u'''您在 <a href="%s">%s</a> 上的评论有了新的回复：
-				%s：
-				%s
+				replynotice.html = u'''您在 <a href="%s">%s</a> 上的评论有了新的回复：<br />
+				<p><b>%s：</b>
+				%s</p>
 				链接：
 				<a href="%s">%s</a>
 				''' % (site.url, site.title, comment.author, comment.content, commenturl, commenturl)
@@ -729,7 +849,10 @@ class DeleteComment(webapp.RequestHandler):
 class UpdateComment(webapp.RequestHandler):
 	def get(self):
 		key = self.request.get('key')
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -781,9 +904,42 @@ class UpdateComment(webapp.RequestHandler):
 		else:
 			self.redirect('/')
 
+class AboutPage(webapp.RequestHandler):
+	def get(self):
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
+		if not site:
+			self.redirect('/config')
+		else:
+			template_values = {
+				'site': site,
+				'page': 'about',
+				'recentcomments': getrecentcomments(PAGESIZE)
+			}
+
+			user = users.get_current_user()
+			if user:
+				template_values['logout'] = users.create_logout_url(self.request.uri)
+				template_values['user'] = users.get_current_user()
+				if users.is_current_user_admin():
+					template_values['admin'] = True
+			else:
+				template_values['login'] = users.create_login_url(self.request.uri)
+
+			if ismobile(self):
+				template_values['mobile'] = True
+
+			path = os.path.join(os.path.dirname(__file__), 'template/about.html')
+			self.response.out.write(template.render(path, template_values))
+
 class GuestbookPage(webapp.RequestHandler):
 	def get(self):
-		site = Site.all().get()
+		site = memcache.get("site")
+		if site is None:
+			site = Site.all().get()
+			memcache.add("site", site)
 		if not site:
 			self.redirect('/config')
 		else:
@@ -793,7 +949,8 @@ class GuestbookPage(webapp.RequestHandler):
 					template_values = {
 						'site': site,
 						'captcha': outputcaptcha,
-						'guestbook': True
+						'page': 'guestbook',
+						'recentcomments': getrecentcomments(PAGESIZE)
 					}
 
 					user = users.get_current_user()
@@ -805,7 +962,10 @@ class GuestbookPage(webapp.RequestHandler):
 					else:
 						template_values['login'] = users.create_login_url(self.request.uri)
 
-					comments = getcomments(None, None)
+					comments = memcache.get("comments-none")
+					if comments is None:
+						comments = getcomments(None, None)
+						memcache.add("comments-none", comments)
 
 					for comment in comments:
 						comment.email = hashlib.new('md5', comment.email).hexdigest()
@@ -850,6 +1010,7 @@ application = webapp.WSGIApplication([
 	('/previous/(.*)', PreviousPage),
 	('/next/(.*)', NextPage),
 	('/config', ConfigPage),
+	('/about', AboutPage),
 	('/guestbook', GuestbookPage),
 	('/(.*)', MainPage)
 ], debug=True)
