@@ -269,6 +269,16 @@ var lostab = {
 					that.ajax($(this).find("#content").find("#posts"));
 					var nextposts = $(this).find("#content").find("#posts").find(".post");
 					nextposts.appendTo($("#posts"));
+					nextposts.find(".post-title .post-permalink").each(function(){
+						var post = $(this);
+						$("#rightsidebar #recentposts").append("<li class=\"recentpost\"></li>");
+						$("#rightsidebar #recentposts .recentpost:last").append(post.clone());
+						$("#rightsidebar #recentposts .recentpost:last .post-permalink").click(function(){
+							var postkey = $(this).attr("href").split("/post/")[1];
+							$("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
+							return false;
+						});
+					});
 					var nextpagelink = $(this).find("#page-link").find("#next-link");
 					$(this).remove();
 					if(nextpagelink.length>0){
@@ -629,7 +639,7 @@ $(document).ready(function(){
 		}
 		
 		if(getScrollTop()>rightsidebartop && (getScrollTop()+getClientHeight())>=rightsidebarbottom){
-			$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),bottom:"35px"});
+			$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),bottom:"34px"});
 		}else{
 			$("#rightsidebar").css({position:"relative",left:"",bottom:""});
 		}

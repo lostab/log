@@ -606,6 +606,16 @@ class UpdatePost(webapp.RequestHandler):
 						post.title = title
 						post.content = content
 						post.put()
+						mempost = memcache.get("post-" + key)
+						if mempost is not None:
+							memcache.replace("post-" + key, post)
+						memposts = memcache.get("posts")
+						if memposts is not None:
+							for item in memposts:
+								if item.key().__str__() == key:
+									item.title = title
+									item.content = content
+							memcache.replace("posts", memposts)
 					self.redirect('/post/' + key)
 				else:
 					self.redirect('/')
@@ -678,7 +688,7 @@ class ViewPost(webapp.RequestHandler):
 						replykey = self.request.get('reply')
 						if replykey:
 							comment = memcache.get("comment-" + replykey)
-							if comments is None:
+							if comment is None:
 								comment = Comment.all().order("-__key__").filter('__key__ =', db.Key(replykey)).get()
 								memcache.add("comment-" + replykey, comment)
 							if comment and comment.post == key:
@@ -975,7 +985,10 @@ class GuestbookPage(webapp.RequestHandler):
 					reply = None
 					replykey = self.request.get('reply')
 					if replykey:
-						comment = Comment.all().order("-__key__").filter('__key__ =', db.Key(replykey)).get()
+						comment = memcache.get("comment-" + replykey)
+						if comment is None:
+							comment = Comment.all().order("-__key__").filter('__key__ =', db.Key(replykey)).get()
+							memcache.add("comment-" + replykey, comment)
 						if comment and comment.post == None:
 							reply = {
 									'key': str(replykey),
