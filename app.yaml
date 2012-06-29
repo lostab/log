@@ -20,5 +20,8 @@ handlers:
 - url: /jstetris
   static_dir: static/JsTetris
 
+- url: /thelostvikings
+  static_dir: static/thelostvikings
+
 - url: /.*
   script: lostab.py

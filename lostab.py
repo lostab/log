@@ -116,7 +116,10 @@ def outputcomment(post, comments, temp, parentkey, reply):
 				temp.append(child)
 				childkey = child.key().__str__()
 				commenthtml += '<li class="comment" id="comment-' + childkey + '">'
-				commenthtml += '<div class="comment-avator"><img src="http://www.gravatar.com/avatar/'+ cgi.escape(child.email.encode('utf-8')) +'?s=48"></div>'
+				if post:
+					commenthtml += '<div class="comment-avator"><a class="comment-permalink" href="/post/' + post + '#comment-' + childkey + '"><img src="http://www.gravatar.com/avatar/'+ cgi.escape(child.email.encode('utf-8')) +'?s=48" /></a></div>'
+				else:
+					commenthtml += '<div class="comment-avator"><a class="comment-permalink" href="/guestbook#comment-' + childkey + '"><img src="http://www.gravatar.com/avatar/'+ cgi.escape(child.email.encode('utf-8')) +'?s=48" /></a></div>'
 				commenthtml += '<div class="comment-author">'
 				if child.url:
 					commenthtml += '<a href="'+ cgi.escape(child.url.encode('utf-8')) +'">'
@@ -126,6 +129,9 @@ def outputcomment(post, comments, temp, parentkey, reply):
 					commenthtml += '匿名'
 				if child.url:
 					commenthtml += '</a>'
+				commenthtml += '</div>'
+				commenthtml += '<div class="comment-info">'
+				commenthtml += ' <a class="time">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
 				commenthtml += '</div>'
 				commenthtml += '<div class="comment-content">'
 				commenthtml += '<pre>' + cgi.escape(child.content.encode('utf-8')) + '</pre>'
@@ -139,24 +145,21 @@ def outputcomment(post, comments, temp, parentkey, reply):
 				if users.is_current_user_admin():
 					commenthtml += ' <a class="update-link" href="/update/comment?key=' + childkey + '">修改</a>'
 					commenthtml += ' <a class="delete-link" href="/delete/comment?key=' + childkey + '">删除</a>'
-				if post:
-					commenthtml += ' <a class="comment-permalink time" href="/post/' + post + '#comment-' + childkey + '">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
-				else:
-					commenthtml += ' <a class="comment-permalink time" href="/guestbook#comment-' + childkey + '">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
+				#commenthtml += ' <a class="time">' + cgi.escape(str((child.time + timedelta(hours=+8)).strftime('%Y-%m-%d %H:%M:%S')).encode('utf-8')) + '</a>'
 				commenthtml += '</div>'
 				if reply and reply['key'] == childkey:
 					commenthtml += '<div id="comment-form">'
 					commenthtml += '<h5>回复评论</h5>'
 					commenthtml += '<form action="/add/comment" method="post">'
-					commenthtml += '<label for="comment-author">名称：</label><input type="text" name="author" id="comment-author">'
+					commenthtml += '<label>名称：<input type="text" name="author" id="comment-author"></label>'
 					commenthtml += '<br />'
-					commenthtml += '<label for="comment-email">邮箱：</label><input type="email" name="email" id="comment-email">'
+					commenthtml += '<label>邮箱：<input type="email" name="email" id="comment-email"></label>'
 					commenthtml += '<br />'
-					commenthtml += '<label for="comment-url">网址：</label><input type="url" name="url" id="comment-url">'
+					commenthtml += '<label>网址：<input type="url" name="url" id="comment-url"></label>'
 					commenthtml += '<br />'
-					commenthtml += '<label for="comment-content">内容：</label><textarea name="content" id="comment-content"></textarea>'
+					commenthtml += '<label>内容：<textarea name="content" id="comment-content"></textarea></label>'
 					commenthtml += '<br />'
-					commenthtml += '<label for="comment-captcha">请输入“' + reply['captcha'] + '”的阿拉伯数字：</label><input type="number" name="captcha" id="comment-captcha" min="0" max="9">'
+					commenthtml += '<label>请输入“' + reply['captcha'] + '”的阿拉伯数字：<input type="number" name="captcha" id="comment-captcha" min="0" max="9"></label>'
 					commenthtml += '<br />'
 					commenthtml += '<input type="submit" value="提交" id="comment-submit">'
 					if post:
@@ -224,6 +227,9 @@ class MainPage(webapp.RequestHandler):
 						memcache.add("qposts-" + q, posts)
 				else:
 					posts = memcache.get("posts")
+					if posts is not None and len(posts) != PAGESIZE + 1:
+						memcache.delete("posts")
+						posts = None
 					if posts is None:
 						query = Post.gql('ORDER BY time DESC, __key__ ASC')
 						posts = query.fetch(PAGESIZE + 1)
@@ -538,6 +544,7 @@ class AddPost(webapp.RequestHandler):
 				posts = memcache.get("posts")
 				if posts is not None:
 					posts.insert(0, post)
+					posts.pop()
 					memcache.replace("posts", posts)
 
 				key = post.key().__str__()
@@ -786,7 +793,7 @@ class AddComment(webapp.RequestHandler):
 				postcommentskey = "none"
 			postcomments = memcache.get("comments-" + postcommentskey)
 			if postcomments is not None:
-				postcomments.insert(0, comment)
+				postcomments.append(comment)
 				memcache.replace("comments-" + postcommentskey, postcomments)
 
 			postcommentcount = memcache.get("postcommentcount-" + postcommentskey)

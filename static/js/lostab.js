@@ -45,16 +45,16 @@ var lostab = {
 	ajax:function(obj){
 		var that = this;
 
-		if($("#comment-form").length>0){
-			if($.cookie("author")!=null){
-				$("#comment-form").find("form").find("#comment-author").val($.cookie("author"));
-			}
-			if($.cookie("email")!=null){
-				$("#comment-form").find("form").find("#comment-email").val($.cookie("email"));
-			}
-			if($.cookie("url")!=null){
-				$("#comment-form").find("form").find("#comment-url").val($.cookie("url"));
-			}
+		lostab.temp["rightsidebarbottom"] = lostab.temp["rightsidebartop"]+$("#rightsidebar").height();
+
+		if($.cookie("author")!=null){
+			obj.find("#comment-form").find("form").find("#comment-author").val($.cookie("author"));
+		}
+		if($.cookie("email")!=null){
+			obj.find("#comment-form").find("form").find("#comment-email").val($.cookie("email"));
+		}
+		if($.cookie("url")!=null){
+			obj.find("#comment-form").find("form").find("#comment-url").val($.cookie("url"));
 		}
 		
 		if(page=="home"||page=="previous"||page=="next"){
@@ -80,6 +80,17 @@ var lostab = {
 				$(this).load($(this).attr("href")+" #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
 					that.ajax($("#wrapper"));
+					$("html,body").animate({scrollTop:0},800);
+					
+					var title = $(this).text();
+					var url = $(this).attr("href");
+					var state = {
+						title: title,
+						url: url
+					};
+					try{
+						window.history.replaceState(state, title, url);
+					}catch(e){}
 				});
 				return false;
 			});
@@ -102,6 +113,15 @@ var lostab = {
 					that.ajax($("#wrapper"));
 					$("html,body").animate({scrollTop:0},800);
 				});
+				var title = $(this).text();
+				var url = $(this).attr("href");
+				var state = {
+					title: title,
+					url: url
+				};
+				try{
+					window.history.replaceState(state, title, url);
+				}catch(e){}
 				return false;
 			});
 			obj.find("#simple-publish,#publish-form").find("form").submit(function(){
@@ -276,9 +296,21 @@ var lostab = {
 						$("#rightsidebar #recentposts .recentpost:last .post-permalink").click(function(){
 							var postkey = $(this).attr("href").split("/post/")[1];
 							$("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
+							
+							var title = $(this).text() + " - " + document.title;
+							var url = $(this).attr("href");
+							var state = {
+								title: title,
+								url: url
+							};
+							try{
+								window.history.replaceState(state, title, url);
+							}catch(e){}
+							
 							return false;
 						});
 					});
+					lostab.temp["rightsidebarbottom"] = lostab.temp["rightsidebartop"]+$("#rightsidebar").height();
 					var nextpagelink = $(this).find("#page-link").find("#next-link");
 					$(this).remove();
 					if(nextpagelink.length>0){
@@ -292,8 +324,8 @@ var lostab = {
 				})
 				return false;
 			});
-			obj.find(".comment-link").click(function(){
-				if($("#comment-form").length>0){
+			obj.find(".comment-link").click(function thus(){
+				/*if($("#comment-form").length>0){
 					var pastpost = $("#comment-form").closest(".post");
 					pastpost.html(that.temp["postcontent"].html());
 					that.ajax(pastpost);
@@ -305,21 +337,133 @@ var lostab = {
 				$(this).remove();
 				currentpost.load(url+" #post",function(){
 					$("#previous-next-post").remove();
-					currentpost.find("#post").css("padding","0");
+					currentpost.find(".post").css("padding","0");
 					that.ajax(currentpost);
-					//$("html,body").scrollTop($("#comment-form").offset().top);
 					$("html,body").animate({scrollTop:$("#comment-form").offset().top},800);
+				});*/
+				var currentpost = $(this).closest(".post");
+				var url = $(this).attr("href").split("#")[0];
+				$(this).after($("<span>评论加载中……</span>"));
+				$(this).hide();
+				$(this).load(url+" #post-comment",function(){
+					currentpost.append($(this).find("#post-comment"));
+					that.ajax(currentpost.find("#post-comment"));
+					//$("html,body").animate({scrollTop:currentpost.find("#comment-form").offset().top},800);
+					$(this).prev().remove();
+					$(this).next().remove();
+					$(this).after($("<a class=\"close-comment-link\" style=\"cursor:pointer;display:none;\">收起</a>"));
+					$(this).next(".close-comment-link").click(function(){
+						$(this).before($("<a class=\"comment-link\" href=\""+url+"\">评论</a>"));
+						if(currentpost.find("#post-comment .commentcount").length>0){
+							$(this).prev().before($("<a class=\"commentcountlabel\"><span class=\"commentcount\">"+currentpost.find("#post-comment .commentcount").text()+"</span>条</a>"));
+						}
+						$(this).prev(".comment-link").click(thus);
+						currentpost.find("#post-comment").remove();
+						$(this).remove();
+					});
+					$(this).remove();
 				});
+				
+				var title = document.title;
+				var url = $(this).attr("href");
+				var state = {
+					title: title,
+					url: url
+				};
+				try{
+					window.history.replaceState(state, title, url);
+				}catch(e){}
+				
 				return false;
 			});
-			obj.find("#rightsidebar").find("#recentposts").find(".recentpost .post-permalink").click(function(){
+			obj.find(".post-permalink").click(function(){
 				var postkey = $(this).attr("href").split("/post/")[1];
 				$("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
+				
+				var currentpost = $(this).closest(".post");
+				if(currentpost.find("#post-comment").length>0){
+					currentpost.find(".close-comment-link").click();
+				}else{
+					currentpost.find(".comment-link").click();
+				}
+				
+				var title = $(this).text() + " - " + document.title;
+				var url = $(this).attr("href");
+				var state = {
+					title: title,
+					url: url
+				};
+				try{
+					window.history.replaceState(state, title, url);
+				}catch(e){}
+				
+				return false;
+			});
+			obj.find(".comment-permalink").click(function(){
+				var commentkey = $(this).attr("href").split("#comment-")[1];
+				$("html,body").animate({scrollTop:$("#comment-"+commentkey).offset().top},800);
+				
+				var title = document.title;
+				var url = $(this).attr("href");
+				var state = {
+					title: title,
+					url: url
+				};
+				try{
+					window.history.replaceState(state, title, url);
+				}catch(e){}
+				
+				return false;
+			});
+			obj.find("#rightsidebar").find("#recentcomments").find(".recentcomment a").click(function(){
+				var postkey = $(this).attr("href").split("#comment-")[0].split("/")[$(this).attr("href").split("#comment-")[0].split("/").length-1];
+				var commentkey = $(this).attr("href").split("#comment-")[1];
+
+				var title = document.title;
+				var url = $(this).attr("href");
+				var state = {
+					title: title,
+					url: url
+				};
+				
+				var gotorecentcomment=function(){
+					if(postkey=="guestbook"){
+						$("#header .guestbook-link").click();
+						if($("#comment-"+commentkey).length>0){
+							$("html,body").animate({scrollTop:$("#comment-"+commentkey).offset().top},800);
+							try{
+								window.history.replaceState(state, title, url);
+							}catch(e){}
+						}else{
+							setTimeout(gotorecentcomment,800);
+						}
+					}else{
+						if($("#posts").length==0){
+							$("#header #title a").click();
+						}
+						if($("#post-"+postkey).length>0){
+							$("#post-"+postkey+" .operate .comment-link").click();
+							if($("#comment-"+commentkey).length>0){
+								$("html,body").animate({scrollTop:$("#comment-"+commentkey).offset().top},800);
+								try{
+									window.history.replaceState(state, title, url);
+								}catch(e){}
+							}else{
+								setTimeout(gotorecentcomment,800);
+							}
+						}else{
+							$("#page-link #next-link").click();
+							setTimeout(gotorecentcomment,800);
+						}
+					}
+				}
+				gotorecentcomment();
+				
 				return false;
 			});
 			/*obj.find("#previous-next-post").find("a").click(function(){
 				var url = $(this).attr("href");
-				var currentpost = $(this).closest("#post").parent();
+				var currentpost = $(this).closest(".post").parent();
 				$(this).after($("<span>文章加载中……</span>"));
 				$(this).remove();
 				currentpost.load(url+" #post",function(){
@@ -327,6 +471,11 @@ var lostab = {
 				});
 				return false;
 			});*/
+		
+			$(".about .guestbook-link").click(function(){
+				$("#header .guestbook-link").click();
+				return false;
+			});
 		}
 
 		obj.find("#search-form").submit(function(){
@@ -386,29 +535,27 @@ var lostab = {
 			}
 			$(this).find("#comment-submit").val("提交中…");
 			$(this).find("#comment-submit").attr("disabled",true);
-			var currentpost = $(this).closest("#post").parent();
+			var currentpost = $(this).closest(".post");
 			$.post("/add/comment",data,function(key){
 				if(postkey!=""){
-					currentpost.load("/post/"+postkey+" #post",function(){
-						if($("#posts").length>0){
-							$("#previous-next-post").remove();
-						}
-						that.ajax($(this));
+					currentpost.find("#post-comment").load("/post/"+postkey+" #post-comment",function(){
+						$(this).after(currentpost.find("#post-comment #post-comment"));
+						$(this).remove();
+						that.ajax(currentpost.find("#post-comment"));
 						$("html,body").scrollTop($("#comment-"+key).offset().top);
 					});
 				}
 				else{
-					currentpost.load("/guestbook #post",function(){
-						if($("#posts").length>0){
-							$("#previous-next-post").remove();
-						}
-						that.ajax($(this));
+					currentpost.find("#post-comment").load("/guestbook #post-comment",function(){
+						$(this).after(currentpost.find("#post-comment #post-comment"));
+						$(this).remove();
+						that.ajax(currentpost.find("#post-comment"));
 						$("html,body").scrollTop($("#comment-"+key).offset().top);
 					});
 				}
 				try{
 					if(that.temp["postcontent"].find(".commentcount").length==0){
-						that.temp["postcontent"].find(".comment-link").before("<span class=\"commentcount\">1</span>条");
+						that.temp["postcontent"].find(".comment-link").before("<a class=\"commentcountlabel\"><span class=\"commentcount\">1</span>条</a>");
 					}
 					else{
 						that.temp["postcontent"].find(".commentcount").text(parseInt(that.temp["postcontent"].find(".commentcount").text())+1);
@@ -430,7 +577,7 @@ var lostab = {
 		});
 		obj.find(".reply-link").click(function(){
 			var parentkey = $(this).attr("href").split("?reply=")[1].split("#")[0];
-			var commentform = $(this).closest("#post").find("#comment-form");
+			var commentform = $(this).closest(".post").find("#comment-form");
 			if(commentform.find("#comment-parentkey").length>0){
 				commentform.closest(".comment").find(".reply-link").show();
 				commentform.find(".cancel-link").remove();
@@ -464,7 +611,7 @@ var lostab = {
 			$(this).closest(".comment").children(".operate").prepend('<a class="reply-link" href="/post/'+post+'?reply='+parentkey+'#comment-form" class="reply-link">回复</a> ');
 			$(this).closest(".comment").find(".reply-link").click(function(){
 				var parentkey = $(this).attr("href").split("?reply=")[1].split("#")[0];
-				var commentform = $(this).closest("#post").find("#comment-form");
+				var commentform = $(this).closest(".post").find("#comment-form");
 				if(commentform.find("#comment-parentkey").length>0){
 					commentform.closest(".comment").find(".reply-link").show();
 					commentform.find(".cancel-link").remove();
@@ -512,6 +659,10 @@ var lostab = {
 				$(this).css({"color":"#d3d3d3"});
 			}
 		});
+		obj.find("#search").bind("webkitspeechchange", function() {
+			$(this).val($(this).val().substr(2));
+			$("#search-form").submit();
+		});
 
 		obj.find("a").each(function(){
 			if($(this).attr("href")!=""&&$(this).attr("href")!=undefined){
@@ -533,17 +684,43 @@ var lostab = {
 			$(this).remove();
 		});
 
-		$.getJSON("http://v.t.qq.com/output/json.php?type=1&name=lostab&sign=7c058f557f638f0a0f44397a98eb58b07990664c&jsoncallback=?",weiboData=function(json){
-			$("#recentstate").closest(".widget").remove();
-			$("#rightsidebar").prepend("<div class=\"widget\" style=\"display:none;\"><h5>最近状态</h5><div id=\"recentstate\">"+json.data[0].content+"</div></div>");
-			$("#recentstate").closest(".widget").slideDown();
+		/*obj.find(".operate a").not(".time,.return-link").css("color","white");
+		obj.find(".operate").parent().mouseover(function(){
+			$(this).children(".operate").find("a").not(".time,.return-link").css("color","green");
+			$(this).children(".operate").find("a:hover").not(".time,.return-link").css("color","white");
+			$(this).children(".operate").find("a:.commentcountlabel").css("color","gray");
 		});
+		obj.find(".operate").parent().mouseout(function(){
+			$(this).children(".operate").find("a").not(".time,.return-link").css("color","white");
+		});*/
+
+		var loadrecentstate=function(){
+			$.getJSON("http://v.t.qq.com/output/json.php?type=1&name=lostab&sign=7c058f557f638f0a0f44397a98eb58b07990664c&jsoncallback=?",weiboData=function(json){
+				$("#recentstate").closest(".widget").remove();
+				$("#rightsidebar").prepend("<div class=\"widget\" style=\"display:none;\"><h5>最近状态</h5><div id=\"recentstate\">"+json.data[0].content+"</div></div>");
+				$("#recentstate").closest(".widget").slideDown();
+				lostab.temp["rightsidebartop"] = $("#rightsidebar").offset().top;
+				lostab.temp["rightsidebarbottom"] = lostab.temp["rightsidebartop"]+$("#rightsidebar").height();
+			});
+			setTimeout(function(){
+				if($("#recentstate").length==0){
+					loadrecentstate();
+				}
+			}, 800);
+		}
+		if($("#rightsidebar").length>0){
+			loadrecentstate();
+		}
 	}
 };
 
 $(document).ready(function(){
 	$("#wrapper").hide();
 	$("#wrapper").fadeIn(800);
+	if($("#rightsidebar").length>0){
+		lostab.temp["rightsidebartop"] = $("#rightsidebar").offset().top;
+		lostab.temp["rightsidebarbottom"] = lostab.temp["rightsidebartop"]+$("#rightsidebar").height();
+	}
 	lostab.ajax($("#wrapper"));
 	/*$.get("/static/img/laputa.jpg",function(){
 		$("body").css({"background": "url(/static/img/laputa.jpg) center no-repeat fixed"});
@@ -596,8 +773,7 @@ $(document).ready(function(){
 	$("#returntop").click(function(){
 		$("html,body").animate({scrollTop:0},800);
 	});
-	var rightsidebarbottom = $("#rightsidebar").offset().top+$("#rightsidebar").height();
-	var rightsidebartop = $("#rightsidebar").offset().top;
+
 	$(window).scroll(function(){
 		/*****************
 		*取窗口滚动条高度*
@@ -638,8 +814,12 @@ $(document).ready(function(){
 			$("#returntop").hide();
 		}
 		
-		if(getScrollTop()>rightsidebartop && (getScrollTop()+getClientHeight())>=rightsidebarbottom){
-			$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),bottom:"34px"});
+		if(getScrollTop()>=lostab.temp["rightsidebartop"]){
+			if(getClientHeight()>=($("#rightsidebar").height()+34)){
+				$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),top:"0"});
+			}else if((getScrollTop()+getClientHeight())>=(lostab.temp["rightsidebarbottom"]+34)&&$("#content").height()>=(lostab.temp["rightsidebarbottom"]+34)){
+				$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),bottom:"34px"});
+			}
 		}else{
 			$("#rightsidebar").css({position:"relative",left:"",bottom:""});
 		}
