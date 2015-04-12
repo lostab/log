@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>Linux</title>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.term {
+    font-family: courier,fixed,swiss,monospace,sans-serif;
+    font-size: 14px;
+    color: #f0f0f0;
+    background: #000000;
+}
+
+.termReverse {
+    color: #000000;
+    background: #00ff00;
+}
+#note {
+    font-size: 12px;
+}
+#copyright {
+    font-size: 10px;
+}
+#clipboard {
+    font-size: 12px;
+}
+</style>
+</head>
+<body onload="start()">
+<table border="0" width="100%" height="100%">
+<tr valign="top"><td>
+<script type="text/javascript" src="utils.js"></script>
+<script type="text/javascript" src="term.js"></script>
+<script type="text/javascript" src="cpux86.js"></script>
+<script type="text/javascript" src="jslinux.js"></script>
+<td style="display:none;"><input type="button" value="Clear clipboard" onclick="clear_clipboard();"><br><textarea row="4" cols="16" id="text_clipboard"></textarea>
+</table>
+</body>
+</html>

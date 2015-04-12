@@ -1,0 +1,35 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.msgbox {
+    width: 100%;
+    height: 100%;
+    margin-top: -60px;
+}
+.msgbar {
+    width: 100%;
+    height: 50px;
+}
+.user {
+    float: left;
+    width: 100px;
+}
+.msgform {
+    
+}
+.msgform .inputmsg {
+    width: 100%;
+    height: 47px;
+}
+.msgform .msginput {
+    margin-left: 110px;
+    margin-right: 110px;
+}
+.msgform .inputsubmit {
+    width: 100px;
+    height: 53px;
+    float: right;
+}

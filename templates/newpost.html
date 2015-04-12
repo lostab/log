@@ -1,0 +1,22 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ site.title|escape }} - 撰写新文章{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+	<div id="publish-form">
+		<h5>撰写新文章</h5>
+		<form action="/add/post" method="post">
+			<label for="post-title">标题：</label><input type="text" name="title" id="post-title">
+			<br />
+			<label for="post-content">内容：</label><textarea name="content" id="post-content"></textarea>
+			<br />
+			<span class="editor-tips">支持HTML，嵌入代码使用&lt;code<b><i>*</i></b>&gt;...&lt;/code<b><i>*</i></b>&gt;标签。</span>
+			<br />
+			<input type="submit" value="发布" id="post-submit">
+		</form>
+		<div class="operate">
+			<a class="cancel-link" href="/">取消</a>
+		</div>
+	</div>
+{% endblock %}

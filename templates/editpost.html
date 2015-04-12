@@ -1,0 +1,24 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ site.title|escape }} - 编辑文章{% if post.title %} - {{ post.title }}{% endif %}{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+	<div id="edit-post">
+		<h5>编辑文章</h5>
+		<form action="/update/post" method="post">
+			<label for="post-title">标题：</label><input type="text" name="title" value="{% if post.title %}{{ post.title|escape }}{% endif %}" id="post-title">
+			<br />
+			<label for="post-content">内容：</label><textarea name="content" id="post-content">{{ post.content|escape }}</textarea>
+			<br />
+			<span class="editor-tips">支持HTML，嵌入代码使用&lt;code<b><i>*</i></b>&gt;...&lt;/code<b><i>*</i></b>&gt;标签。</span>
+			<br />
+			<input type="submit" value="提交" id="post-submit">
+			<br />
+			<input type="hidden" name="key" value="{{ post.key }}" id="post-key">
+		</form>
+		<div class="operate">
+			<a class="cancel-link" href="/post/{{ post.key|escape }}">取消</a>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+<div id="rightsidebar">
+
+	<!--<div class="widget">
+		<h5>最近推荐</h5>
+	</div>-->
+
+{% if recentcomments %}
+	<div class="widget">
+		<h5>最近交流</h5>
+		<ol id="recentcomments">
+		{% for recentcomment in recentcomments %}
+			<li class="recentcomment"><a href="{% if recentcomment.post %}/post/{{ recentcomment.post }}{% else %}/guestbook{% endif %}#comment-{{ recentcomment.key }}">{% if recentcomment.author %}{{ recentcomment.author|escape }}{% else %}匿名{% endif %}</a> {{ recentcomment.content|escape }}</li>
+		{% endfor %}
+		</ol>
+	</div>
+{% endif %}
+{% if recentposts %}
+	<div class="widget">
+		<h5>最近发布</h5>
+		<ol id="recentposts">
+		{% for recentpost in recentposts %}
+			<li class="recentpost"><a class="post-permalink" href="/post/{{ recentpost.key }}" title="{% if recentpost.title %}{{ recentpost.title|escape }}{% else %}{{ recentpost.time|date:"Y-m-d H:i:s" }}{% endif %}">{% if recentpost.title %}{{ recentpost.title|escape }}{% else %}{{ recentpost.time|date:"Y-m-d H:i:s" }}{% endif %}</a></li>
+		{% endfor %}
+		</ol>
+	</div>
+{% endif %}
+</div>

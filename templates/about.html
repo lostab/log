@@ -1,0 +1,44 @@
+﻿{% extends "base.html" %}
+
+{% block title %}关于 - {{ site.title|escape }}{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+	<div id="content">
+		<div class="post about">
+			<h4 class="post-title">
+				关于
+			</h4>
+			<div class="post-content">
+				<img src="/static/img/lostab.png" width="120" height="358" style="float:left;margin:2em;margin-top:0;" />
+				<h5>此处</h5>
+				<p>这个log构架在<a href="http://appengine.google.com/">Google App Engine</a>上，只想看看到底能维持多久，而那个末日终将会伴随一片带来复生希望的崩塌。</p>
+				<p><a href="https://github.com/lostab/log">源码</a>几百年不更新，仅供自娱自乐。</p>
+				<p>另外<a href="/static/blog.xml" target="_blank">迷失的一代</a>就一故纸堆，作为一些回忆。</p>
+				<h5>爱好</h5>
+				<p>互联网、宅、创造、改变现状、咖啡、暴雪、Dota、理查德·克莱德曼、五月天、美国悬疑剧情暴力血腥大片、日本恐怖惊悚励志动作片、宫崎骏、情景喜剧、韩寒、史料、Fuck GFW、各种经历。</p>
+				<h5>收藏</h5>
+				<p>
+				<a href="/winterbells/winterbells.html" title="Winterbells - 圣诞兔子跳铃铛" target="_blank"><img src="/winterbells/winterbells.gif" style="width:48px;height:48px;margin:1px;border:0;" alt="Winterbells - 圣诞兔子跳铃铛" /></a>
+				<a href="/jstetris/tetris.html" title="JsTetris - JavaScript版俄罗斯方块" target="_blank"><img src="/jstetris/tetris.png" style="width:48px;height:48px;margin:1px;border:0;" alt="JsTetris - JavaScript版俄罗斯方块" /></a>
+				<a href="/thelostvikings/thelostvikings.html" title="The Lost Vikings - 失落的维京人" target="_blank"><img src="/thelostvikings/thelostvikings.jpg" style="width:48px;height:48px;margin:1px;border:0;" alt="The Lost Vikings - 失落的维京人" /></a>
+                <a href="/linux/index.html" title="Javascript Linux" target="_blank"><img src="/linux/linux.png" style="width:48px;height:48px;margin:1px;border:0;" alt="Javascript Linux" /></a>
+				</p>
+				<h5>联系</h5>
+				<p>在<a href="/guestbook" class="guestbook-link">留言页面</a>留言，或者通过以下电子邮件地址联系：</p>
+				<p><a href="mailto:w@sadpast.com">w@sadpast.com</a></p>
+				<h5>链接</h5>
+				<p>
+				<a href="http://blog.fallenjie.com/">邵杰</a>
+				<a href="http://chuan7i.com/">朱传奇</a>
+				<a href="http://wangming.me/">王明</a>
+				<a href="http://kyouz.com/">张敬强</a>
+				</p>
+			</div>
+			<div class="operate">
+				<a class="return-link" href="/">返回</a>
+			</div>
+		</div>
+	</div>
+	{% include "rightsidebar.html" %}
+{% endblock %}

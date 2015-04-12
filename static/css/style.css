@@ -37,6 +37,9 @@ input,textarea{
 	font-size:16px;
 	color:gray;
 }
+#menu a{
+    padding:0 7px 0 7px;
+}
 label{
 	font-size:16px;
 }
@@ -57,7 +60,7 @@ img{
 #header h2{
 	margin-top:0;
 	margin-bottom:7px;
-	text-indent:1em;
+	text-indent:2em;
 }
 #header h2 a:hover{
 	background:none;
@@ -77,7 +80,7 @@ a.time:hover,a.commentcountlabel:hover{
 }
 #description{
 	font-size:16px;
-	text-indent:2em;
+	text-indent:3em;
 }
 #search-form{
 	display:inline;
@@ -226,6 +229,9 @@ a.time:hover,a.commentcountlabel:hover{
 	width:300px;
 	height:100px;
 }
+#comment-form #comment-submit{
+	margin-left:40%;
+}
 #rightsidebar{
 	float:right;
 	width:230px;
@@ -294,6 +300,7 @@ a.time:hover,a.commentcountlabel:hover{
 .post:hover,.widget:hover{
 	background:GhostWhite;
 }
+
 ::selection{background:green;color:white;}
 ::-webkit-selection{background:green;color:white;}
 ::-moz-selection{background:green;color:white;}

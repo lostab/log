@@ -1,0 +1,26 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ site.title|escape }} - 修改评论{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+	<div id="edit-comment">
+		<h5>修改评论</h5>
+		<form action="/update/comment" method="post">
+			<label for="comment-author">名称：</label><input type="text" name="author" value="{{ comment.author|escape }}" id="comment-author">
+			<br />
+			<label for="comment-email">邮箱：</label><input type="email" name="email" value="{{ comment.email|escape }}" id="comment-email">
+			<br />
+			<label for="comment-url">网址：</label><input type="url" name="url" value="{{ comment.url|escape }}" id="comment-url">
+			<br />
+			<label for="comment-content">内容：</label><textarea name="content" id="comment-content">{{ comment.content }}</textarea>
+			</br />
+			<input type="submit" value="提交" id="comment-submit">
+			<br />
+			<input type="hidden" name="key" value="{{ comment.key }}" id="comment-key">
+		</form>
+		<div class="operate">
+			<a class="cancel-link" href="/post/{{ comment.post|escape }}#comment-{{ comment.key }}">取消</a>
+		</div>
+	</div>
+{% endblock %}

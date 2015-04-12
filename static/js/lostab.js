@@ -69,14 +69,14 @@ var lostab = {
 				}
 				$(this).find("#search-submit").val("搜索中…");
 				$(this).find("#search-submit").attr("disabled",true);
-				$("#wrapper").load("/?q="+encodeURIComponent($.trim($("#search").val()))+" #wrapper",function(){
+				$("#wrapper").load("/?q="+encodeURIComponent($.trim($("#search").val()).substr(0, 128))+" #wrapper",function(){
 					$(this).html($(this).children("#wrapper").html());
 					that.ajax($(this));
 				});
 				return false;
 			});
 			obj.find("#header").find("a").not(".feed-link,.logout-link,.music-switch").click(function(){
-				$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
+				$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中…</a></div>"));
 				$(this).load($(this).attr("href")+" #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
 					that.ajax($("#wrapper"));
@@ -94,9 +94,23 @@ var lostab = {
 				});
 				return false;
 			});
+            obj.find("#header").find("a.music-switch").click(function(){
+                if(mobile!="true"){
+                    if($(".music-widget").length>0){
+                        if($(".music-widget").css("display")=="none"){
+                            $(".music-widget").fadeIn();
+                        }else{
+                            $(".music-widget").fadeOut();
+                        }
+                    }else{
+                        //$("#rightsidebar").musicwidget({marginleft: 0, margintop: 1});
+                        $("#wrapper").musicwidget({marginleft: $("#rightsidebar").offset().left-$("#wrapper").offset().left, margintop: $("#rightsidebar").offset().top-$("#wrapper").offset().top+1});
+                    }
+                }
+            });
 			obj.find("#publish-form,#config-form,#edit-post,#edit-comment").find(".cancel-link").click(function(){
-				//$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
-				$(this).after($("<span>加载中……</span>"));
+				//$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中…</a></div>"));
+				$(this).after($("<span>加载中…</span>"));
 				$(this).remove();
 				$(this).load("/ #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
@@ -105,8 +119,8 @@ var lostab = {
 				return false;
 			});
 			obj.find(".return-link").click(function(){
-				//$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中……</a></div>"));
-				$(this).after($("<span>加载中……</span>"));
+				//$("#header").after($("<div style=\"width:100%;position:fixed;_position:absolute;left:0;top:63px;text-align:center;\"><a style=\"background:lightblue;color:white;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;-khtml-border-radius:3px;\">加载中…</a></div>"));
+				$(this).after($("<span>加载中…</span>"));
 				$(this).remove();
 				$(this).load("/ #wrapper",function(){
 					$("#wrapper").html($(this).children("#wrapper").html());
@@ -325,6 +339,9 @@ var lostab = {
 				return false;
 			});
 			obj.find(".comment-link").click(function thus(){
+                if($(this).is(":hidden")){
+                    return false;
+                }
 				/*if($("#comment-form").length>0){
 					var pastpost = $("#comment-form").closest(".post");
 					pastpost.html(that.temp["postcontent"].html());
@@ -378,25 +395,39 @@ var lostab = {
 			});
 			obj.find(".post-permalink").click(function(){
 				var postkey = $(this).attr("href").split("/post/")[1];
-				$("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
-				
-				var currentpost = $(this).closest(".post");
-				if(currentpost.find("#post-comment").length>0){
-					currentpost.find(".close-comment-link").click();
-				}else{
-					currentpost.find(".comment-link").click();
-				}
-				
-				var title = $(this).text() + " - " + document.title;
-				var url = $(this).attr("href");
-				var state = {
-					title: title,
-					url: url
-				};
-				try{
-					window.history.replaceState(state, title, url);
-				}catch(e){}
-				
+                var currentpage = window.location.href.split("//")[1].split(/[/#]/)[1];
+                
+                if(currentpage == "about" || currentpage == "guestbook"){
+                    $("#header .home-link").click();
+                    var gotorecentpost=function(){
+                        if($("#post-"+postkey).length==0){
+                            setTimeout(gotorecentpost,800);
+                        }else{
+                            $("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
+                        }
+                    }
+                    gotorecentpost();
+                    return false;
+                }
+                $("html,body").animate({scrollTop:$("#post-"+postkey).offset().top},800);
+                
+                var currentpost = $(this).closest(".post");
+                if(currentpost.find("#post-comment").length>0){
+                    currentpost.find(".close-comment-link").click();
+                }else{
+                    currentpost.find(".comment-link").click();
+                }
+                
+                var title = $(this).text() + " - " + document.title;
+                var url = $(this).attr("href");
+                var state = {
+                    title: title,
+                    url: url
+                };
+                try{
+                    window.history.replaceState(state, title, url);
+                }catch(e){}
+                
 				return false;
 			});
 			obj.find(".comment-permalink").click(function(){
@@ -666,7 +697,7 @@ var lostab = {
 
 		obj.find("a").each(function(){
 			if($(this).attr("href")!=""&&$(this).attr("href")!=undefined){
-				if($(this).attr("href").substr(0,1)!="/"){
+				if($(this).attr("href").substr(0,1)!="/" && $(this).attr("href").split("//").length>1){
 					var targethost=$(this).attr("href").split("//")[1].split("/")[0];
 					var currenthost=window.location.href.split("//")[1].split("/")[0];
 					if(targethost!=currenthost){
@@ -677,13 +708,13 @@ var lostab = {
 		});
 
 		obj.find(".post-content").find("img").bind("error",function(){
-			$(this).after("<span style=\"color:gray;\">图片加载失败，很有可能你遇上<a href=\"http://zh.wikipedia.org/wiki/防火长城\">GFW</a>了。</span>");
+			$(this).after("<span style=\"color:gray;\">图片加载失败，很有可能你遇上<a href=\"http://zh.wikipedia.org/wiki/防火长城\" target=\"_blank\">GFW</a>了。</span>");
 			$(this).remove();
 		});
 		obj.find(".comment-avator").find("img").bind("error",function(){
 			$(this).remove();
 		});
-
+        
 		/*obj.find(".operate a").not(".time,.return-link").css("color","white");
 		obj.find(".operate").parent().mouseover(function(){
 			$(this).children(".operate").find("a").not(".time,.return-link").css("color","green");
@@ -694,7 +725,7 @@ var lostab = {
 			$(this).children(".operate").find("a").not(".time,.return-link").css("color","white");
 		});*/
 
-		var loadrecentstate=function(){
+		/*var loadrecentstate=function(){
 			$.getJSON("http://v.t.qq.com/output/json.php?type=1&name=lostab&sign=7c058f557f638f0a0f44397a98eb58b07990664c&jsoncallback=?",weiboData=function(json){
 				$("#recentstate").closest(".widget").remove();
 				$("#rightsidebar").prepend("<div class=\"widget\" style=\"display:none;\"><h5>最近状态</h5><div id=\"recentstate\">"+json.data[0].content+"</div></div>");
@@ -710,23 +741,24 @@ var lostab = {
 		}
 		if($("#rightsidebar").length>0){
 			loadrecentstate();
-		}
+		}*/
 	}
 };
 
 $(document).ready(function(){
-	$("#wrapper").hide();
-	$("#wrapper").fadeIn(800);
+	//$("#wrapper").hide();
+	//$("#wrapper").fadeIn(800);
 	if($("#rightsidebar").length>0){
 		lostab.temp["rightsidebartop"] = $("#rightsidebar").offset().top;
 		lostab.temp["rightsidebarbottom"] = lostab.temp["rightsidebartop"]+$("#rightsidebar").height();
+        lostab.temp["scrolltop"] = 0;
 	}
 	lostab.ajax($("#wrapper"));
 	/*$.get("/static/img/laputa.jpg",function(){
 		$("body").css({"background": "url(/static/img/laputa.jpg) center no-repeat fixed"});
 	});*/
 	
-	if(page=="home"&&q==""){
+	if(page=="home"&&q==""&&mobile!="true"){        
 		$(window).scroll(function(){
 			/*****************
 			*取窗口滚动条高度*
@@ -761,7 +793,7 @@ $(document).ready(function(){
 				return Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
 			}
 			
-			if(getScrollTop()+getClientHeight()+70>=getScrollHeight()){
+			if(getScrollTop()+getClientHeight()+800>=getScrollHeight()){
 				if($("#next-link").length>0){
 					$("#next-link").click();
 				}
@@ -774,54 +806,71 @@ $(document).ready(function(){
 		$("html,body").animate({scrollTop:0},800);
 	});
 
-	$(window).scroll(function(){
-		/*****************
-		*取窗口滚动条高度*
-		*****************/
-		function getScrollTop(){
-			var scrollTop=0;
-			if(document.documentElement&&document.documentElement.scrollTop){
-				scrollTop=document.documentElement.scrollTop;
-			}
-			else if(document.body){
-				scrollTop=document.body.scrollTop;
-			}
-			return scrollTop;
-		}
-		/*********************
-		*取窗口可视范围的高度*
-		*********************/
-		function getClientHeight(){
-			var clientHeight=0;
-			if(document.body.clientHeight&&document.documentElement.clientHeight){
-				var clientHeight = (document.body.clientHeight<document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
-			}
-			else{
-				var clientHeight = (document.body.clientHeight>document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
-			}
-			return clientHeight;
-		}
-		/*******************
-		*取文档内容实际高度*
-		*******************/
-		function getScrollHeight(){
-			return Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
-		}
-		
-		if(getScrollTop()>0){
-			$("#returntop").show();
-		}else{
-			$("#returntop").hide();
-		}
-		
-		if(getScrollTop()>=lostab.temp["rightsidebartop"]){
-			if(getClientHeight()>=($("#rightsidebar").height()+34)){
-				$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),top:"0"});
-			}else if((getScrollTop()+getClientHeight())>=(lostab.temp["rightsidebarbottom"]+34)&&$("#content").height()>=(lostab.temp["rightsidebarbottom"]+34)){
-				$("#rightsidebar").css({position:"fixed",left:$("#container").offset().left+$("#container").width()-$("#rightsidebar").width(),bottom:"34px"});
-			}
-		}else{
-			$("#rightsidebar").css({position:"relative",left:"",bottom:""});
-		}
-	});
+    if(mobile!="true"){
+        $(window).scroll(function(){
+            /*****************
+            *取窗口滚动条高度*
+            *****************/
+            function getScrollTop(){
+                var scrollTop=0;
+                if(document.documentElement&&document.documentElement.scrollTop){
+                    scrollTop=document.documentElement.scrollTop;
+                }
+                else if(document.body){
+                    scrollTop=document.body.scrollTop;
+                }
+                return scrollTop;
+            }
+            /*********************
+            *取窗口可视范围的高度*
+            *********************/
+            function getClientHeight(){
+                var clientHeight=0;
+                if(document.body.clientHeight&&document.documentElement.clientHeight){
+                    var clientHeight = (document.body.clientHeight<document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
+                }
+                else{
+                    var clientHeight = (document.body.clientHeight>document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
+                }
+                return clientHeight;
+            }
+            /*******************
+            *取文档内容实际高度*
+            *******************/
+            function getScrollHeight(){
+                return Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
+            }
+            
+            if(getScrollTop()>0){
+                $("#returntop").show();
+            }else{
+                $("#returntop").hide();
+            }
+            
+            $("#rightsidebar").css({position:"relative"});
+            if(($("#rightsidebar").height() + 34) >= getClientHeight()){
+                if(getScrollTop() >= lostab.temp["rightsidebartop"]){
+                    if(getScrollTop() >= lostab.temp["scrolltop"]){
+                        if((getScrollTop() + getClientHeight()) >= ($("#rightsidebar").offset().top + $("#rightsidebar").height() + 34)){
+                            $("#rightsidebar").css({"top": (getScrollTop() + getClientHeight() - $("#rightsidebar").height() - 34 - lostab.temp["rightsidebartop"]) + "px"});
+                        }
+                    }else{
+                        if($("#rightsidebar").offset().top >= getScrollTop()){
+                            $("#rightsidebar").css({"top": (getScrollTop() - lostab.temp["rightsidebartop"]) + "px"});
+                        }
+                    }
+                }else{
+                    $("#rightsidebar").css({"top": "0"});
+                }
+            }else{
+                if(getScrollTop() >= lostab.temp["rightsidebartop"]){
+                    $("#rightsidebar").css({"top": (getScrollTop() - lostab.temp["rightsidebartop"]) + "px"});
+                }else{
+                    $("#rightsidebar").css({"top": "0"});
+                }
+            }
+            lostab.temp["scrolltop"] = getScrollTop();
+            
+        });
+    }
 });

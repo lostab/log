@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,width=device-width,initial-scale=1.0" />
+    <meta property="qc:admins" content="300016321763140134637574765" />
+    <title>love</title>
+    <link rel="stylesheet" href="/static/css/love.css" type="text/css" />
+</head>
+<body>
+    {% if not user_info %}
+    <div class="msgbox"></div>
+    <div class="msgbar">
+        <div class="user"><img src="{{ user_info.figureurl_qq_1 }}" /><br />{{ user_info.nickname }}<br /><a href="?login=logout">退出</a></div>
+        <form method="post" class="msgform">
+            <input name="user" type="hidden" value="{{ user_info.nickname }}" />
+            <input type="submit" value="发送" class="inputsubmit" />
+            <div class="msginput"><input name="msg" class="inputmsg" /></div>
+        </form>
+    </div>
+    {% else %}
+    <p style="text-align:center;"><a href="?login=qq"><img src="http://qzonestyle.gtimg.cn/qzone/vas/opensns/res/img/Connect_logo_3.png" /></a></p>
+    {% endif %}
+    <p style="text-align:center;">{% if debug %}{{ debug }}{% endif %}</p>
+</body>
+</html>

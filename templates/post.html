@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{% if post.title %}{{ post.title|escape }}{% else %}{{ post.time|date:"Y-m-d H:i:s" }}{% endif %} - {% if reply %}回复评论 - {% endif %}{{ site.title|escape }}{% endblock %}
+{% block site-title %}{{ site.title|escape }}{% endblock %}
+{% block site-description %}{{ site.description|escape }}{% endblock %}
+{% block container %}
+	<div id="content">
+		<div class="post">
+				<h4 class="post-title">
+					<a class="post-permalink" href="/post/{{ post.key }}">
+				{% if post.title %}
+					{{ post.title|escape }}
+				{% else %}
+					{{ post.time|date:"Y-m-d H:i:s" }}
+				{% endif %}
+					</a>
+				</h4>
+				<div class="post-info"><a class="time">{{ post.time|date:"Y-m-d H:i:s" }}</a></div>
+				<div class="post-content">
+					{{ post.content|safe }}
+				</div>
+				<div class="operate">
+				{% if admin %}
+					<a class="update-link" href="/update/post?key={{ post.key }}">修改</a>
+					<a class="delete-link" href="/delete/post?key={{ post.key }}">删除</a>
+				{% endif %}
+					<!--<a class="time">{{ post.time|date:"Y-m-d H:i:s" }}</a>-->
+				</div>
+				<div id="previous-next-post">
+				{% if previouspost %}
+					<a href="/post/{{ previouspost.key }}">上一篇{% if previouspost.title|escape %}：{{ previouspost.title|escape }}{% endif %}</a>
+				{% endif %}
+				{% if previouspost and nextpost %}
+					|
+				{% endif %}
+				{% if nextpost %}
+					<a href="/post/{{ nextpost.key }}">下一篇{% if nextpost.title|escape %}：{{ nextpost.title|escape }}{% endif %}</a>
+				{% endif %}
+				</div>
+				<div id="post-comment">
+				{% if not reply %}
+					<div id="comment-form">
+						<h5>添加评论</h5>
+						<form action="/add/comment" method="post">
+							<label>名称：<input type="text" name="author" id="comment-author"></label>
+							<br />
+							<label>邮箱：<input type="email" name="email" id="comment-email"></label>
+							<br />
+							<label>网址：<input type="url" name="url" id="comment-url"></label>
+							<br />
+							<label>内容：<textarea name="content" id="comment-content"></textarea></label>
+							<br />
+							<label>请输入“{{ captcha|escape }}”的阿拉伯数字：<input type="number" name="captcha" id="comment-captcha" min="0" max="9"></label>
+							<br />
+							<input type="submit" value="提交" id="comment-submit">
+							<br />
+							<input type="hidden" name="post" value="{{ post.key }}" id="comment-post">
+						</form>
+					</div>
+				{% endif %}
+				{% if commenthtml and commentcount %}
+					<div id="comments-list">
+						<h5>查看评论(<span class="commentcount">{{ commentcount }}</span>)</h5>
+						<ol id="comments">
+						{{ commenthtml|safe }}
+						</ol>
+					</div>
+				{% endif %}
+				</div>
+		</div>
+	</div>
+	{% include "rightsidebar.html" %}
+{% endblock %}

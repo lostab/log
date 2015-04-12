@@ -1,10 +1,8 @@
-application: lostab
+application: pastlog
 version: 1
-runtime: python
+runtime: python27
 api_version: 1
-
-builtins:
-- datastore_admin: on
+threadsafe: true
 
 handlers:
 - url: /static
@@ -23,5 +21,15 @@ handlers:
 - url: /thelostvikings
   static_dir: static/thelostvikings
 
+- url: /linux/
+  static_dir: static/jslinux
+
 - url: /.*
-  script: lostab.py
+  script: log.app
+
+libraries:
+- name: django
+  version: "1.2"
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'settings'
